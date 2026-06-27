@@ -18,7 +18,7 @@ import {
   Plus,
 } from "../components/Icons";
 import { volumeLastDays, waterToday, waterSeries } from "../lib/selectors";
-import { fmtVolume, fmtWeight, relativeTime, toUnit } from "../lib/utils";
+import { fmtVolume, relativeTime, toUnit } from "../lib/utils";
 
 export default function Dashboard() {
   const nav = useNavigate();
