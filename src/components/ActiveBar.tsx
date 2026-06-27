@@ -12,8 +12,7 @@ export default function ActiveBar() {
 
   useEffect(() => {
     if (!active) return;
-    const update = () =>
-      setElapsed(Math.floor((Date.now() - active.startedAt) / 1000));
+    const update = () => setElapsed(Math.floor((Date.now() - active.startedAt) / 1000));
     update();
     const t = setInterval(update, 1000);
     return () => clearInterval(t);
@@ -25,27 +24,27 @@ export default function ActiveBar() {
         <motion.button
           type="button"
           onClick={() => navigate("/workout")}
-          initial={{ y: 40, opacity: 0 }}
+          initial={{ y: 60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 40, opacity: 0 }}
+          exit={{ y: 60, opacity: 0 }}
           transition={{ type: "spring", stiffness: 380, damping: 32 }}
-          className="card grain group flex w-full items-center justify-between px-5 py-3.5 text-left"
+          className="card flex w-full items-center justify-between px-5 py-4 text-left"
         >
-          <span className="absolute left-1/2 top-2 h-1 w-9 -translate-x-1/2 rounded-full bg-white/25" />
+          <span className="absolute left-1/2 top-2 h-[3px] w-8 -translate-x-1/2 rounded-full bg-white/20" />
           <div>
-            <div className="num text-3xl font-extrabold tracking-tight text-white">
+            <div className="num text-[28px] font-extrabold tracking-tight">
               {fmtClock(elapsed)}
             </div>
             <div className="mt-0.5 text-sm text-mute">
-              {active.focus} · <span className="text-accent">En cours</span>
+              {active.focus} · <span className="text-white/80">En cours</span>
             </div>
           </div>
           <motion.span
-            whileHover={{ scale: 1.08 }}
+            whileHover={{ scale: 1.06 }}
             whileTap={{ scale: 0.92 }}
-            className="grid h-12 w-12 place-items-center rounded-full bg-white text-black"
+            className="grid h-11 w-11 place-items-center rounded-full bg-white text-black"
           >
-            <ArrowUp size={22} />
+            <ArrowUp size={20} />
           </motion.span>
         </motion.button>
       )}

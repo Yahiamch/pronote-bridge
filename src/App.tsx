@@ -1,9 +1,10 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./lib/auth";
 import Layout from "./components/Layout";
 import Dashboard from "./pages/Dashboard";
+import Auth from "./pages/Auth";
 
-// Code-split the heavier / less-frequent routes (charts, etc.)
 const Water = lazy(() => import("./pages/Water"));
 const Stats = lazy(() => import("./pages/Stats"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
@@ -12,18 +13,32 @@ const Coach = lazy(() => import("./pages/Coach"));
 const Workout = lazy(() => import("./pages/Workout"));
 const Settings = lazy(() => import("./pages/Settings"));
 
-function Loader() {
+function Spinner() {
   return (
     <div className="grid h-[60vh] place-items-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-accent" />
+      <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-white/70" />
     </div>
   );
 }
 
-export default function App() {
+function AppRoutes() {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="grid min-h-[100dvh] place-items-center bg-black">
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-white/10 border-t-white/70" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth />;
+  }
+
   return (
     <Layout>
-      <Suspense fallback={<Loader />}>
+      <Suspense fallback={<Spinner />}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/water" element={<Water />} />
@@ -33,8 +48,17 @@ export default function App() {
           <Route path="/coach" element={<Coach />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
   );
 }

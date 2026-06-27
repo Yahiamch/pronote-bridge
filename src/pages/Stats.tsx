@@ -27,7 +27,6 @@ function Kpi({
   value,
   display,
   suffix,
-  color,
   delay,
 }: {
   icon: any;
@@ -35,34 +34,28 @@ function Kpi({
   value: number;
   display?: string;
   suffix?: string;
-  color: string;
   delay: number;
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="card grain p-5"
+      className="card p-5"
     >
-      <div
-        className="mb-3 grid h-10 w-10 place-items-center rounded-xl"
-        style={{ background: `${color}22`, color }}
-      >
-        <Icon size={19} />
+      <div className="mb-3 grid h-9 w-9 place-items-center rounded-xl bg-white/[0.07] text-white/70">
+        <Icon size={17} />
       </div>
-      <div className="num text-3xl font-extrabold leading-none">
+      <div className="num text-3xl font-extrabold leading-none text-white">
         {display ?? (
           <>
             <CountUp value={value} />
             {suffix && <span className="text-base font-medium text-mute"> {suffix}</span>}
           </>
         )}
-        {display && suffix && (
-          <span className="text-base font-medium text-mute"> {suffix}</span>
-        )}
+        {display && suffix && <span className="text-base font-medium text-mute"> {suffix}</span>}
       </div>
-      <div className="mt-1.5 text-sm text-mute">{label}</div>
+      <div className="mt-1.5 text-[13px] text-mute">{label}</div>
     </motion.div>
   );
 }
@@ -106,9 +99,8 @@ export default function Stats() {
     <>
       <PageHeader
         title="Statistiques"
-        subtitle="Performances"
         actions={
-          <div className="hidden rounded-pill border border-white/[0.07] bg-ink-850 p-1 sm:flex">
+          <div className="hidden rounded-pill border border-white/[0.07] bg-ink-800 p-1 sm:flex">
             {RANGES.map((r) => (
               <button
                 key={r.weeks}
@@ -131,8 +123,7 @@ export default function Stats() {
         }
       />
 
-      {/* Mobile range selector */}
-      <div className="mb-4 flex rounded-pill border border-white/[0.07] bg-ink-850 p-1 sm:hidden">
+      <div className="mb-4 flex rounded-pill border border-white/[0.07] bg-ink-800 p-1 sm:hidden">
         {RANGES.map((r) => (
           <button
             key={r.weeks}
@@ -153,77 +144,75 @@ export default function Stats() {
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3.5 lg:grid-cols-4 lg:gap-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Kpi
           icon={Dumbbell}
           label={`Volume (${profile.unit})`}
           value={0}
           display={fmtVolume(totalVol, profile.unit)}
           suffix={profile.unit}
-          color="#c6ff5a"
           delay={0.02}
         />
-        <Kpi icon={TrendUp} label="Séances" value={sessCount} color="#5ad1c8" delay={0.06} />
-        <Kpi icon={Flame} label="Calories" value={totalCals} suffix="kcal" color="#ff7a45" delay={0.1} />
-        <Kpi
-          icon={Clock}
-          label="Durée moy."
-          value={Math.round(avgDur)}
-          suffix="min"
-          color="#9b8cff"
-          delay={0.14}
-        />
+        <Kpi icon={TrendUp} label="Séances" value={sessCount} delay={0.06} />
+        <Kpi icon={Flame} label="Calories" value={totalCals} suffix="kcal" delay={0.1} />
+        <Kpi icon={Clock} label="Durée moy." value={Math.round(avgDur)} suffix="min" delay={0.14} />
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.18 }}
-          className="card grain p-5 lg:col-span-2"
-        >
-          <div className="mb-3 flex items-center justify-between">
-            <div>
-              <div className="font-bold">Volume hebdomadaire</div>
-              <div className="text-sm text-mute">{profile.unit} soulevés par semaine</div>
+      {sessions.length === 0 ? (
+        <div className="mt-12 flex flex-col items-center gap-3 text-center">
+          <div className="text-4xl opacity-30">📊</div>
+          <p className="text-mute">Aucune séance enregistrée pour l'instant.</p>
+          <p className="text-sm text-mute-soft">Commence ta première séance depuis l'accueil.</p>
+        </div>
+      ) : (
+        <div className="mt-4 grid gap-3.5 lg:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="card p-5 lg:col-span-2"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <div className="font-bold">Volume hebdomadaire</div>
+                <div className="text-[13px] text-mute">{profile.unit} soulevés/semaine</div>
+              </div>
+              <div className="chip"><TrendUp size={12} /> Progression</div>
             </div>
-            <div className="chip">
-              <TrendUp size={13} /> Progression
-            </div>
-          </div>
-          <AreaFull data={volSeries} color="#c6ff5a" height={240} unit={` ${profile.unit}`} />
-        </motion.div>
+            <AreaFull data={volSeries} color="#fff" height={220} unit={` ${profile.unit}`} />
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.22 }}
-          className="card grain p-5"
-        >
-          <div className="mb-3 font-bold">Poids de corps</div>
-          <LineMini data={wSeries} color="#9b8cff" height={220} unit={` ${profile.unit}`} />
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.22 }}
+            className="card p-5"
+          >
+            <div className="mb-3 font-bold">Poids de corps</div>
+            <LineMini data={wSeries} color="#fff" height={200} unit={` ${profile.unit}`} />
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.26 }}
-          className="card grain p-5"
-        >
-          <div className="mb-3 font-bold">Séances par jour</div>
-          <Bars data={byDay} color="#5ad1c8" height={220} />
-        </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.26 }}
+            className="card p-5"
+          >
+            <div className="mb-3 font-bold">Séances par jour</div>
+            <Bars data={byDay} color="#fff" height={200} />
+          </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="card grain p-5 lg:col-span-2"
-        >
-          <div className="mb-3 font-bold">Calories brûlées · 14 jours</div>
-          <AreaFull data={cals} color="#ff7a45" height={200} unit=" kcal" />
-        </motion.div>
-      </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="card p-5 lg:col-span-2"
+          >
+            <div className="mb-3 font-bold">Calories brûlées · 14 jours</div>
+            <AreaFull data={cals} color="#fff" height={180} unit=" kcal" />
+          </motion.div>
+        </div>
+      )}
     </>
   );
 }

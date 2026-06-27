@@ -167,3 +167,23 @@ export const Bolt = ({ size = 22, ...p }: P) => (
     <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
   </svg>
 );
+
+export const LogOut = ({ size = 22, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+  </svg>
+);
+
+export const Link = ({ size = 22, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+export const AlertCircle = ({ size = 22, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <circle cx="12" cy="12" r="10" />
+    <path d="M12 8v4M12 16h.01" />
+  </svg>
+);
