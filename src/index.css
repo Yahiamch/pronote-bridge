@@ -1,0 +1,93 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+/* Hide scrollbars but keep scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-thin: none;
+  scrollbar-width: none;
+}
+
+/* Custom thin scrollbar for desktop panels */
+.thin-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.thin-scroll::-webkit-scrollbar-thumb {
+  background: #232328;
+  border-radius: 999px;
+}
+.thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@layer components {
+  .card {
+    @apply relative rounded-card bg-gradient-to-b from-ink-800 to-ink-900 border border-white/[0.06] shadow-card;
+  }
+  .card-flat {
+    @apply relative rounded-card bg-ink-850 border border-white/[0.05];
+  }
+  .pill-btn {
+    @apply inline-flex items-center justify-center rounded-pill bg-ink-750 border border-white/[0.07] text-white transition-colors hover:bg-ink-700 active:scale-95;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-pill bg-white/[0.06] px-3 py-1 text-xs font-medium text-mute;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* The signature "folder tab" notch shape */
+.folder-clip {
+  -webkit-mask: url("#folderMask");
+  mask: url("#folderMask");
+}
+
+/* Grain / noise overlay */
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Selection */
+::selection {
+  background: rgba(90, 209, 200, 0.3);
+}
