@@ -19,7 +19,6 @@ import {
   ChevronRight,
 } from "../components/Icons";
 import {
-  lastSession,
   volumeLastDays,
   waterToday,
   waterSeries,
@@ -47,7 +46,6 @@ export default function Dashboard() {
   const [newName, setNewName] = useState("");
   const [wInput, setWInput] = useState(toUnit(profile.bodyWeight, profile.unit).toFixed(1));
 
-  const last = lastSession(sessions);
   const vol7 = volumeLastDays(sessions, 7);
   const wToday = waterToday(water);
   const waterPct = Math.min(1, wToday / profile.waterGoalMl);
@@ -185,12 +183,9 @@ export default function Dashboard() {
             <div className="text-sm text-mute">7 derniers jours</div>
           </div>
           <div className="flex items-baseline gap-1">
-            <CountUp
-              value={Number(fmtVolume(vol7, profile.unit).replace("k", ""))}
-              decimals={vol7 > 1000 ? 1 : 0}
-              format={() => fmtVolume(vol7, profile.unit)}
-              className="num text-[28px] font-extrabold leading-none"
-            />
+            <span className="num text-[28px] font-extrabold leading-none">
+              {fmtVolume(vol7, profile.unit)}
+            </span>
             <span className="text-sm text-mute">{profile.unit}</span>
           </div>
           <ChevronRight size={18} className="text-mute-soft" />

@@ -25,6 +25,7 @@ function Kpi({
   icon: Icon,
   label,
   value,
+  display,
   suffix,
   color,
   delay,
@@ -32,6 +33,7 @@ function Kpi({
   icon: any;
   label: string;
   value: number;
+  display?: string;
   suffix?: string;
   color: string;
   delay: number;
@@ -50,8 +52,15 @@ function Kpi({
         <Icon size={19} />
       </div>
       <div className="num text-3xl font-extrabold leading-none">
-        <CountUp value={value} />
-        {suffix && <span className="text-base font-medium text-mute"> {suffix}</span>}
+        {display ?? (
+          <>
+            <CountUp value={value} />
+            {suffix && <span className="text-base font-medium text-mute"> {suffix}</span>}
+          </>
+        )}
+        {display && suffix && (
+          <span className="text-base font-medium text-mute"> {suffix}</span>
+        )}
       </div>
       <div className="mt-1.5 text-sm text-mute">{label}</div>
     </motion.div>
@@ -148,8 +157,9 @@ export default function Stats() {
         <Kpi
           icon={Dumbbell}
           label={`Volume (${profile.unit})`}
-          value={Number(fmtVolume(totalVol, profile.unit).replace("k", "")) }
-          suffix={totalVol > 1000 ? "k" : profile.unit}
+          value={0}
+          display={fmtVolume(totalVol, profile.unit)}
+          suffix={profile.unit}
           color="#c6ff5a"
           delay={0.02}
         />
