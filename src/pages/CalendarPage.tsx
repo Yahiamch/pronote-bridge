@@ -57,76 +57,67 @@ export default function CalendarPage() {
 
   return (
     <>
-      <PageHeader title="Calendrier" subtitle="Ton historique" />
+      <PageHeader title="Calendrier" />
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <div className="card grain p-5">
+      <div className="grid gap-3.5 lg:grid-cols-2">
+        <div className="card p-5">
           <div className="mb-4 flex items-center justify-between">
-            <button
-              onClick={() => shift(-1)}
-              className="pill-btn h-9 w-9 rotate-180 text-mute"
-            >
-              <ChevronRight size={18} />
+            <button onClick={() => shift(-1)} className="pill-btn h-9 w-9 rotate-180 text-mute">
+              <ChevronRight size={17} />
             </button>
             <div className="font-bold capitalize">{monthLabel}</div>
             <button onClick={() => shift(1)} className="pill-btn h-9 w-9 text-mute">
-              <ChevronRight size={18} />
+              <ChevronRight size={17} />
             </button>
           </div>
 
-          <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-xs text-mute-soft">
-            {WD.map((d, i) => (
-              <div key={i}>{d}</div>
-            ))}
+          <div className="mb-2 grid grid-cols-7 gap-1.5 text-center text-[11px] text-mute-soft">
+            {WD.map((d, i) => <div key={i}>{d}</div>)}
           </div>
+
           <div className="grid grid-cols-7 gap-1.5">
             {grid.map((key, i) => {
               if (!key) return <div key={i} />;
               const data = byDay.get(key);
               const isToday = key === todayKey();
               const isSel = key === selected;
-              const intensity = data ? 0.25 + (data.volume / maxVol) * 0.75 : 0;
+              const intensity = data ? 0.15 + (data.volume / maxVol) * 0.55 : 0;
               const dayNum = Number(key.slice(-2));
               return (
                 <motion.button
                   key={key}
-                  whileTap={{ scale: 0.9 }}
+                  whileTap={{ scale: 0.88 }}
                   onClick={() => setSelected(key)}
                   className={`relative aspect-square rounded-xl text-sm font-medium transition-all ${
-                    isSel ? "ring-2 ring-accent" : "ring-1 ring-white/[0.04]"
+                    isSel ? "ring-2 ring-white/40" : ""
                   }`}
                   style={{
                     background: data
-                      ? `rgba(90,209,200,${intensity * 0.5})`
-                      : "rgba(255,255,255,0.02)",
+                      ? `rgba(255,255,255,${intensity})`
+                      : "rgba(255,255,255,0.03)",
                   }}
                 >
-                  <span className={isToday ? "text-accent" : data ? "text-white" : "text-mute"}>
+                  <span className={isToday ? "font-bold text-white" : data ? "text-white" : "text-mute"}>
                     {dayNum}
                   </span>
                   {data && (
-                    <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-accent" />
+                    <span className="absolute bottom-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-white/60" />
                   )}
                 </motion.button>
               );
             })}
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-2 text-xs text-mute-soft">
+          <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-mute-soft">
             <span>Moins</span>
-            {[0.1, 0.3, 0.5, 0.8].map((o) => (
-              <span
-                key={o}
-                className="h-3 w-3 rounded"
-                style={{ background: `rgba(90,209,200,${o})` }}
-              />
+            {[0.05, 0.15, 0.3, 0.5].map((o) => (
+              <span key={o} className="h-3 w-3 rounded" style={{ background: `rgba(255,255,255,${o})` }} />
             ))}
             <span>Plus</span>
           </div>
         </div>
 
-        {/* Selected day detail */}
-        <div className="card grain p-5">
+        <div className="card p-5">
           <div className="mb-4 font-bold capitalize">
             {new Date(selected + "T12:00").toLocaleDateString("fr-FR", {
               weekday: "long",
@@ -137,8 +128,8 @@ export default function CalendarPage() {
           {selectedSessions.length === 0 ? (
             <div className="grid h-48 place-items-center text-center text-mute-soft">
               <div>
-                <Dumbbell size={28} className="mx-auto mb-2 opacity-40" />
-                Aucune séance ce jour
+                <Dumbbell size={26} className="mx-auto mb-2 opacity-30" />
+                <span className="text-sm">Aucune séance ce jour</span>
               </div>
             </div>
           ) : (
@@ -146,22 +137,16 @@ export default function CalendarPage() {
               {selectedSessions.map((s, i) => (
                 <motion.div
                   key={s.id}
-                  initial={{ opacity: 0, x: 10 }}
+                  initial={{ opacity: 0, x: 8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className="rounded-2xl border border-white/[0.05] bg-white/[0.02] p-4"
+                  className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-4"
                 >
                   <div className="mb-2 font-semibold">{s.name}</div>
-                  <div className="flex flex-wrap gap-2 text-xs text-mute">
-                    <span className="chip">
-                      <Dumbbell size={13} /> {fmtVolume(s.volume, profile.unit)} {profile.unit}
-                    </span>
-                    <span className="chip">
-                      <Clock size={13} /> {fmtDuration(s.durationSec)}
-                    </span>
-                    <span className="chip">
-                      <Flame size={13} /> {s.calories} kcal
-                    </span>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="chip"><Dumbbell size={12} /> {fmtVolume(s.volume, profile.unit)} {profile.unit}</span>
+                    <span className="chip"><Clock size={12} /> {fmtDuration(s.durationSec)}</span>
+                    <span className="chip"><Flame size={12} /> {s.calories} kcal</span>
                   </div>
                 </motion.div>
               ))}

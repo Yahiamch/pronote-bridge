@@ -63,7 +63,7 @@ export default function Program() {
                 <div className="h-10 w-px bg-white/10" />
                 <div className="flex flex-1 items-center gap-5">
                   <span className="flex items-center gap-1.5 text-sm font-medium">
-                    <Flame size={16} className="text-accent-flame" /> {d.kcal}
+                    <Flame size={16} className="text-white/60" /> {d.kcal}
                   </span>
                   <span className="flex items-center gap-1.5 text-sm text-mute">
                     <Clock size={16} /> {d.minutes} min
