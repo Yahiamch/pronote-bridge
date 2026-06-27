@@ -187,3 +187,15 @@ export const AlertCircle = ({ size = 22, ...p }: P) => (
     <path d="M12 8v4M12 16h.01" />
   </svg>
 );
+
+export const Upload = ({ size = 22, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v13" />
+  </svg>
+);
+
+export const Activity = ({ size = 22, ...p }: P) => (
+  <svg {...base(size)} {...p}>
+    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+  </svg>
+);

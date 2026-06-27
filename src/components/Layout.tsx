@@ -17,9 +17,10 @@ import {
 
 const mobileNav = [
   { to: "/", icon: Grid, label: "Accueil", end: true },
-  { to: "/calendar", icon: Calendar, label: "Calendrier" },
   { to: "/stats", icon: Chart, label: "Stats" },
   { to: "/coach", icon: Chat, label: "Coach" },
+  { to: "/calendar", icon: Calendar, label: "Agenda" },
+  { to: "/settings", icon: Settings, label: "Réglages" },
 ];
 
 const sidebarNav = [
@@ -115,7 +116,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Main content */}
         <main className="relative min-h-[100dvh] flex-1 overflow-x-hidden">
-          <div className="mx-auto w-full max-w-[680px] px-4 pb-36 pt-6 lg:max-w-none lg:px-10 lg:pt-10 lg:pb-16">
+          <div className="mx-auto w-full max-w-[680px] px-4 pb-36 pt-[max(1.5rem,var(--safe-top))] lg:max-w-none lg:px-10 lg:pt-10 lg:pb-16">
             <motion.div
               key={location.pathname}
               initial={{ opacity: 0, y: 6 }}
@@ -134,29 +135,36 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="mb-2.5">
             <ActiveBar />
           </div>
-          <nav className="flex items-center justify-around rounded-pill border border-white/[0.08] bg-ink-850/90 px-3 py-2 backdrop-blur-2xl">
+          <nav className="flex items-stretch justify-between gap-1 rounded-[26px] border border-white/[0.08] bg-ink-850/85 p-1.5 shadow-lift backdrop-blur-2xl">
             {mobileNav.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 end={item.end}
-                className="relative flex flex-1 flex-col items-center py-2"
+                className="relative flex flex-1 flex-col items-center gap-1 rounded-[20px] py-2"
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
                       <motion.span
                         layoutId="dock-active"
-                        className="absolute inset-x-2 inset-y-0.5 rounded-pill bg-white/[0.1]"
+                        className="absolute inset-0 rounded-[20px] bg-white/[0.1]"
                         transition={{ type: "spring", stiffness: 400, damping: 32 }}
                       />
                     )}
                     <item.icon
-                      size={22}
+                      size={20}
                       className={`relative z-10 transition-colors ${
                         isActive ? "text-white" : "text-mute-soft"
                       }`}
                     />
+                    <span
+                      className={`relative z-10 text-[10px] font-medium leading-none transition-colors ${
+                        isActive ? "text-white" : "text-mute-soft"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
                   </>
                 )}
               </NavLink>

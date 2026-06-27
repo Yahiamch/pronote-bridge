@@ -1,10 +1,20 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { useStore } from "../store/useStore";
 import { useAuth } from "../lib/auth";
 import PageHeader from "../components/PageHeader";
+import Modal from "../components/ui/Modal";
 import { toUnit } from "../lib/utils";
-import { Apple, Heart, Link, AlertCircle, LogOut, ChevronRight } from "../components/Icons";
+import { parseHealthFile } from "../lib/importers";
+import {
+  Apple,
+  Activity,
+  Upload,
+  LogOut,
+  ChevronRight,
+  Check,
+  AlertCircle,
+} from "../components/Icons";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -15,60 +25,83 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-interface IntegrationCardProps {
-  icon: React.ReactNode;
-  name: string;
-  description: string;
-  badge?: string;
-  available?: boolean;
-}
+type Provider = "apple" | "basicfit" | "csv";
 
-function IntegrationCard({ icon, name, description, badge, available = false }: IntegrationCardProps) {
-  const [attempted, setAttempted] = useState(false);
-
-  return (
-    <motion.button
-      type="button"
-      onClick={() => !available && setAttempted(true)}
-      whileTap={{ scale: 0.98 }}
-      className="flex w-full items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 text-left transition-colors hover:bg-white/[0.05]"
-    >
-      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/[0.08] text-white/80">
-        {icon}
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold">{name}</span>
-          {badge && (
-            <span className="rounded-full bg-white/[0.08] px-2 py-0.5 text-[11px] text-mute">
-              {badge}
-            </span>
-          )}
-        </div>
-        <div className="mt-0.5 text-[13px] text-mute">{description}</div>
-        {attempted && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            className="mt-2 flex items-start gap-1.5 text-[12px] text-mute"
-          >
-            <AlertCircle size={13} className="mt-0.5 shrink-0" />
-            <span>Nécessite l'app iOS native pour accéder aux données de santé.</span>
-          </motion.div>
-        )}
-      </div>
-      <ChevronRight size={16} className="shrink-0 text-mute-soft" />
-    </motion.button>
-  );
-}
+const PROVIDERS: Record<
+  Provider,
+  { name: string; accept: string; how: string; note?: string }
+> = {
+  apple: {
+    name: "Apple Health",
+    accept: ".zip,.xml",
+    how: "Sur iPhone : app Santé → ta photo de profil (en haut) → « Exporter toutes les données de santé ». Tu obtiens un fichier export.zip — importe-le ici.",
+    note: "Importe tes entraînements (musculation, course, vélo…) et ton poids. Tout reste sur ton appareil.",
+  },
+  basicfit: {
+    name: "Basic-Fit",
+    accept: ".csv,.xlsx,.txt",
+    how: "Basic-Fit ne propose pas d'export officiel ni d'API publique. Si tu notes tes séances dans un tableur (Google Sheets / Excel), exporte-le en CSV avec des colonnes date, nom, durée, calories — et importe-le ici.",
+    note: "Colonnes reconnues : date, nom/séance, durée (min), volume, calories, poids.",
+  },
+  csv: {
+    name: "Import CSV",
+    accept: ".csv,.txt",
+    how: "Importe un CSV depuis n'importe quelle app (Strong, Hevy, FitNotes…). Colonnes reconnues : date, nom, durée, volume, calories, poids.",
+  },
+};
 
 export default function Settings() {
-  const { profile, setUnit, updateProfile, setWaterGoal, sessions } = useStore();
+  const { profile, setUnit, updateProfile, setWaterGoal, sessions, importData } = useStore();
   const { user, signOut } = useAuth();
+
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [provider, setProvider] = useState<Provider | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  const pick = () => {
+    setResult(null);
+    fileRef.current?.click();
+  };
+
+  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setBusy(true);
+    setResult(null);
+    try {
+      const data = await parseHealthFile(file);
+      const added = importData({ sessions: data.sessions, weights: data.weights });
+      if (added.sessions === 0 && added.weights === 0) {
+        setResult({
+          ok: false,
+          msg: "Aucune nouvelle donnée trouvée (déjà importée ou format non reconnu).",
+        });
+      } else {
+        setResult({
+          ok: true,
+          msg: `${added.sessions} séance(s) et ${added.weights} mesure(s) de poids importées 🎉`,
+        });
+      }
+    } catch (err: any) {
+      setResult({ ok: false, msg: err?.message || "Échec de l'import du fichier." });
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <>
       <PageHeader title="Réglages" />
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept={provider ? PROVIDERS[provider].accept : ".zip,.xml,.csv"}
+        className="hidden"
+        onChange={onFile}
+      />
 
       <div className="grid gap-3.5 lg:grid-cols-2">
         {/* Profil */}
@@ -88,7 +121,7 @@ export default function Settings() {
               className="w-40 rounded-xl bg-ink-700 px-3 py-2 text-right text-sm outline-none ring-1 ring-white/[0.07] focus:ring-white/20"
             />
           </Row>
-          <Row label={`Taille (cm)`}>
+          <Row label="Taille (cm)">
             <input
               type="number"
               value={profile.height}
@@ -149,35 +182,31 @@ export default function Settings() {
           </Row>
         </div>
 
-        {/* Integrations */}
+        {/* Intégrations */}
         <div className="card p-6 lg:col-span-2">
-          <div className="section-label">Intégrations</div>
+          <div className="section-label">Connecter mes données</div>
           <div className="flex flex-col gap-3">
-            <IntegrationCard
+            <IntegrationRow
               icon={<Apple size={20} />}
               name="Apple Health"
-              description="Synchronise tes données de santé et d'activité"
-              badge="App iOS requise"
-              available={false}
+              description="Importe tes entraînements et ton poids depuis l'app Santé"
+              onClick={() => { setProvider("apple"); setResult(null); }}
             />
-            <IntegrationCard
-              icon={<Heart size={20} />}
-              name="Basic Fit"
-              description="Importe tes entraînements en salle"
-              badge="Bientôt disponible"
-              available={false}
+            <IntegrationRow
+              icon={<Activity size={20} />}
+              name="Basic-Fit"
+              description="Importe tes séances en salle via un fichier"
+              onClick={() => { setProvider("basicfit"); setResult(null); }}
             />
-            <IntegrationCard
-              icon={<Link size={20} />}
+            <IntegrationRow
+              icon={<Upload size={20} />}
               name="Import CSV"
-              description="Importe tes données depuis une autre app"
-              badge="Manuel"
-              available={false}
+              description="Strong, Hevy, FitNotes ou ton propre tableur"
+              onClick={() => { setProvider("csv"); setResult(null); }}
             />
           </div>
-          <p className="mt-4 text-center text-[12px] text-mute-soft">
-            L'intégration Apple Health nécessite une app iOS native avec HealthKit.
-            Basic Fit ne propose pas d'API publique à ce jour.
+          <p className="mt-4 text-[12px] leading-relaxed text-mute-soft">
+            Tout l'import se fait localement dans ton navigateur — aucune donnée n'est envoyée à un serveur.
           </p>
         </div>
 
@@ -206,6 +235,85 @@ export default function Settings() {
           </div>
         </div>
       </div>
+
+      {/* Import modal */}
+      <Modal
+        open={provider !== null}
+        onClose={() => { if (!busy) { setProvider(null); setResult(null); } }}
+        title={provider ? PROVIDERS[provider].name : ""}
+      >
+        {provider && (
+          <div className="flex flex-col gap-4">
+            <p className="text-[13px] leading-relaxed text-mute">{PROVIDERS[provider].how}</p>
+            {PROVIDERS[provider].note && (
+              <div className="rounded-xl bg-white/[0.04] px-3.5 py-3 text-[12px] leading-relaxed text-mute-soft">
+                {PROVIDERS[provider].note}
+              </div>
+            )}
+
+            {result && (
+              <motion.div
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                className={`flex items-start gap-2 rounded-xl px-3.5 py-3 text-[13px] ${
+                  result.ok ? "bg-white/[0.07] text-white" : "bg-red-500/10 text-red-400"
+                }`}
+              >
+                {result.ok ? (
+                  <Check size={15} className="mt-0.5 shrink-0" />
+                ) : (
+                  <AlertCircle size={15} className="mt-0.5 shrink-0" />
+                )}
+                <span>{result.msg}</span>
+              </motion.div>
+            )}
+
+            <button
+              onClick={pick}
+              disabled={busy}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white py-3.5 font-bold text-black transition-transform active:scale-[0.98] disabled:opacity-60"
+            >
+              {busy ? (
+                "Analyse en cours…"
+              ) : (
+                <>
+                  <Upload size={17} /> Choisir un fichier
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </Modal>
     </>
+  );
+}
+
+function IntegrationRow({
+  icon,
+  name,
+  description,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  name: string;
+  description: string;
+  onClick: () => void;
+}) {
+  return (
+    <motion.button
+      type="button"
+      onClick={onClick}
+      whileTap={{ scale: 0.98 }}
+      className="flex w-full items-center gap-4 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-4 text-left transition-colors hover:bg-white/[0.05]"
+    >
+      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-white/[0.08] text-white/80">
+        {icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="font-semibold">{name}</div>
+        <div className="mt-0.5 text-[13px] text-mute">{description}</div>
+      </div>
+      <ChevronRight size={16} className="shrink-0 text-mute-soft" />
+    </motion.button>
   );
 }

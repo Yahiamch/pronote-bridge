@@ -35,6 +35,11 @@ interface State {
   addRoutine: (name: string, folderId?: string | null) => string;
   deleteRoutine: (id: string) => void;
 
+  importData: (data: { sessions?: Session[]; weights?: WeightLog[] }) => {
+    sessions: number;
+    weights: number;
+  };
+
   startWorkout: (routineId?: string, name?: string) => void;
   toggleSet: (exId: string, setIdx: number) => void;
   updateSet: (
@@ -84,6 +89,48 @@ export const useStore = create<State>()(
 
       setUnit: (unit) => set((s) => ({ profile: { ...s.profile, unit } })),
       updateProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
+
+      importData: (data) => {
+        let addedSessions = 0;
+        let addedWeights = 0;
+        set((s) => {
+          // Dedupe sessions by id and by (minute-precise date + duration)
+          const ids = new Set(s.sessions.map((x) => x.id));
+          const keys = new Set(
+            s.sessions.map((x) => x.date.slice(0, 16) + "|" + Math.round(x.durationSec))
+          );
+          const fresh = (data.sessions ?? []).filter((x) => {
+            const k = x.date.slice(0, 16) + "|" + Math.round(x.durationSec);
+            if (ids.has(x.id) || keys.has(k)) return false;
+            ids.add(x.id);
+            keys.add(k);
+            addedSessions++;
+            return true;
+          });
+
+          // Dedupe weights by day (keep existing if already present)
+          const wmap = new Map(s.weight.map((w) => [w.date, w]));
+          (data.weights ?? []).forEach((w) => {
+            if (!wmap.has(w.date)) {
+              wmap.set(w.date, w);
+              addedWeights++;
+            }
+          });
+          const weight = [...wmap.values()].sort((a, b) => a.date.localeCompare(b.date));
+
+          const sessions = [...s.sessions, ...fresh].sort(
+            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+          );
+
+          const lastW = weight.at(-1);
+          return {
+            sessions,
+            weight,
+            profile: lastW ? { ...s.profile, bodyWeight: lastW.value } : s.profile,
+          };
+        });
+        return { sessions: addedSessions, weights: addedWeights };
+      },
 
       addFolder: (name) =>
         set((s) => ({
