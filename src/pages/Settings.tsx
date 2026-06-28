@@ -6,9 +6,9 @@ import PageHeader from "../components/PageHeader";
 import Modal from "../components/ui/Modal";
 import { toUnit } from "../lib/utils";
 import { parseHealthFile } from "../lib/importers";
+import BasicFitCard from "../components/BasicFitCard";
 import {
   Apple,
-  Activity,
   Upload,
   LogOut,
   ChevronRight,
@@ -25,7 +25,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   );
 }
 
-type Provider = "apple" | "basicfit" | "csv";
+type Provider = "apple" | "csv";
 
 const PROVIDERS: Record<
   Provider,
@@ -36,12 +36,6 @@ const PROVIDERS: Record<
     accept: ".zip,.xml",
     how: "Sur iPhone : app Santé → ta photo de profil (en haut) → « Exporter toutes les données de santé ». Tu obtiens un fichier export.zip — importe-le ici.",
     note: "Importe tes entraînements (musculation, course, vélo…) et ton poids. Tout reste sur ton appareil.",
-  },
-  basicfit: {
-    name: "Basic-Fit",
-    accept: ".csv,.xlsx,.txt",
-    how: "Basic-Fit ne propose pas d'export officiel ni d'API publique. Si tu notes tes séances dans un tableur (Google Sheets / Excel), exporte-le en CSV avec des colonnes date, nom, durée, calories — et importe-le ici.",
-    note: "Colonnes reconnues : date, nom/séance, durée (min), volume, calories, poids.",
   },
   csv: {
     name: "Import CSV",
@@ -186,17 +180,12 @@ export default function Settings() {
         <div className="card p-6 lg:col-span-2">
           <div className="section-label">Connecter mes données</div>
           <div className="flex flex-col gap-3">
+            <BasicFitCard />
             <IntegrationRow
               icon={<Apple size={20} />}
               name="Apple Health"
               description="Importe tes entraînements et ton poids depuis l'app Santé"
               onClick={() => { setProvider("apple"); setResult(null); }}
-            />
-            <IntegrationRow
-              icon={<Activity size={20} />}
-              name="Basic-Fit"
-              description="Importe tes séances en salle via un fichier"
-              onClick={() => { setProvider("basicfit"); setResult(null); }}
             />
             <IntegrationRow
               icon={<Upload size={20} />}

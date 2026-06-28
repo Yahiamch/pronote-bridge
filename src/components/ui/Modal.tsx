@@ -16,13 +16,13 @@ export default function Modal({
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[60] flex items-end justify-center sm:items-center"
+          className="fixed inset-0 z-[90] flex items-end justify-center sm:items-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
             onClick={onClose}
           />
           <motion.div
@@ -30,7 +30,7 @@ export default function Modal({
             animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 30 }}
-            className="card relative z-10 m-3 w-full max-w-md p-6 pb-[max(24px,var(--safe-bottom))]"
+            className="card relative z-10 m-3 max-h-[88dvh] w-full max-w-md overflow-y-auto thin-scroll p-6 pb-[max(28px,calc(var(--safe-bottom)+20px))] sm:max-h-[90dvh]"
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-lg font-bold">{title}</h3>

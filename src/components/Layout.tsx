@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../lib/auth";
 import { useStore } from "../store/useStore";
 import ActiveBar from "./ActiveBar";
+import Logo from "./Logo";
 import {
   Grid,
   Calendar,
@@ -11,7 +12,7 @@ import {
   Droplet,
   Trophy,
   Settings,
-  Dumbbell,
+  Heart,
   LogOut,
 } from "./Icons";
 
@@ -19,7 +20,7 @@ const mobileNav = [
   { to: "/", icon: Grid, label: "Accueil", end: true },
   { to: "/stats", icon: Chart, label: "Stats" },
   { to: "/coach", icon: Chat, label: "Coach" },
-  { to: "/calendar", icon: Calendar, label: "Agenda" },
+  { to: "/profile", icon: Heart, label: "Profil" },
   { to: "/settings", icon: Settings, label: "Réglages" },
 ];
 
@@ -44,7 +45,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <aside className="sticky top-0 hidden h-[100dvh] w-[240px] shrink-0 flex-col border-r border-white/[0.06] px-4 py-8 lg:flex">
           <div className="mb-8 flex items-center gap-3 px-3">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-white/[0.08] border border-white/[0.08]">
-              <Dumbbell size={18} />
+              <Logo size={20} className="text-white" />
             </div>
             <div>
               <div className="text-base font-extrabold tracking-tight">Forge</div>
@@ -82,17 +83,24 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="mt-auto flex flex-col gap-1">
-            {profile.name && (
-              <div className="mb-2 flex items-center gap-2.5 rounded-xl px-3 py-2">
-                <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white/[0.12] text-xs font-bold">
-                  {profile.name[0]?.toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-medium leading-none">{profile.name}</div>
-                  <div className="mt-0.5 text-[11px] text-mute">{profile.streak} jours de suite</div>
-                </div>
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `mb-2 flex items-center gap-2.5 rounded-xl px-3 py-2 transition-colors ${
+                  isActive ? "bg-white/[0.08]" : "hover:bg-white/[0.03]"
+                }`
+              }
+            >
+              <div className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-xs font-bold text-black">
+                {(profile.name || "F")[0]?.toUpperCase()}
               </div>
-            )}
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium leading-none">
+                  {profile.name || "Mon profil"}
+                </div>
+                <div className="mt-0.5 text-[11px] text-mute">{profile.streak} jours de suite</div>
+              </div>
+            </NavLink>
             <NavLink
               to="/settings"
               className={({ isActive }) =>
