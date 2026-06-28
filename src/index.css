@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.thin-scroll::-webkit-scrollbar { width: 6px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: #2c2c2e; border-radius: 999px; }
+.thin-scroll::-webkit-scrollbar-track { background: transparent; }
+
+@layer components {
+  .card {
+    @apply relative rounded-card bg-ink-750 border border-white/[0.07] shadow-card;
+  }
+  .card-flat {
+    @apply relative rounded-card bg-ink-800 border border-white/[0.05];
+  }
+  .pill-btn {
+    @apply inline-flex items-center justify-center rounded-pill bg-ink-750 border border-white/[0.08] text-white transition-all hover:bg-ink-700 active:scale-95;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-pill bg-white/[0.06] px-3 py-1 text-xs font-medium text-mute;
+  }
+  .num {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.03em;
+  }
+  .section-label {
+    @apply mb-3 text-xs font-semibold uppercase tracking-[0.08em] text-mute-soft;
+  }
+}
+
+/* Folder tab notch mask */
+.folder-clip {
+  -webkit-mask: url("#folderMask");
+  mask: url("#folderMask");
+}
+
+::selection {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Input reset */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
