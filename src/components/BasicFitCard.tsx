@@ -93,7 +93,7 @@ export default function BasicFitCard() {
                 ? status?.last_sync
                   ? `Dernière synchro ${relativeTime(status.last_sync)}`
                   : "En attente de synchro"
-                : "Connecte ton compte pour récupérer tes visites automatiquement"}
+                : "Connexion auto (expérimentale) · sinon import manuel"}
             </div>
           </div>
           {!connected ? (
@@ -141,9 +141,14 @@ export default function BasicFitCard() {
       <Modal open={open} onClose={() => !busy && setOpen(false)} title="Connecter Basic-Fit">
         <div className="flex flex-col gap-3">
           <p className="text-[13px] leading-relaxed text-mute">
-            Saisis les identifiants de ton espace membre Basic-Fit. Ils sont chiffrés et stockés
-            de façon sécurisée pour synchroniser tes visites et entraînements chaque jour.
+            Saisis les identifiants de ton espace membre Basic-Fit. Ils sont chiffrés (AES-GCM) et
+            stockés de façon sécurisée pour tenter une synchro quotidienne de tes visites.
           </p>
+          <div className="rounded-xl bg-white/[0.04] px-3.5 py-3 text-[12px] leading-relaxed text-mute-soft">
+            ⚠️ Basic-Fit protège son espace membre par un pare-feu anti-robots (Akamai) qui bloque
+            les serveurs. La connexion automatique peut donc échouer. Dans ce cas, utilise l'import
+            de fichier (Apple Health / CSV) ci-dessous — c'est la méthode la plus fiable.
+          </div>
           <input
             type="email"
             placeholder="Email Basic-Fit"
