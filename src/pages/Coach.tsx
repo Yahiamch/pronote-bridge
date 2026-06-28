@@ -6,16 +6,17 @@ import { Bolt, TrendUp, Droplet, Flame, Heart, Moon, ArrowUp } from "../componen
 import { volumeLastDays, sessionsLastDays, waterToday, currentStreak } from "../lib/selectors";
 import { fmtVolume } from "../lib/utils";
 import { askCoach, type CoachMsg, type CoachStats } from "../lib/coach";
+import { looksLikeData, parsePasted } from "../lib/smartImport";
 
 const SUGGESTIONS = [
   "Comment prendre du muscle ?",
   "Je stagne, que faire ?",
-  "Programme pour sécher",
+  "Colle tes check-ins Basic-Fit",
   "Suis-je assez hydraté ?",
 ];
 
 export default function Coach() {
-  const { sessions, water, weight, profile } = useStore();
+  const { sessions, water, weight, profile, importData } = useStore();
   const [msg, setMsg] = useState("");
   const [sending, setSending] = useState(false);
   const [usedAI, setUsedAI] = useState<boolean | null>(null);
@@ -100,6 +101,25 @@ export default function Coach() {
     setChat(next);
     setMsg("");
     setSending(true);
+
+    // Data intake: if the message is a pasted dump (Basic-Fit, CSV, JSON),
+    // sort it into the app instead of answering as a chat.
+    if (looksLikeData(q)) {
+      const { sessions: s, weights, summary } = parsePasted(q);
+      if (s.length || weights.length) {
+        const added = importData({ sessions: s, weights });
+        const reply =
+          added.sessions || added.weights
+            ? `✅ Données triées et ajoutées à ton calendrier : ${added.sessions} séance(s)${added.weights ? ` et ${added.weights} mesure(s) de poids` : ""}. ` +
+              `${summary ? `Détecté : ${summary}. ` : ""}Tes stats et ta heatmap sont à jour 💪`
+            : `Tout est déjà dans l'app — aucun doublon ajouté.${summary ? ` (${summary})` : ""}`;
+        setChat((c) => [...c, { role: "coach", text: reply }]);
+        setUsedAI(null);
+        setSending(false);
+        return;
+      }
+    }
+
     const { reply, source } = await askCoach(next, stats);
     setUsedAI(source === "ai");
     setChat((c) => [...c, { role: "coach", text: reply }]);
@@ -195,13 +215,19 @@ export default function Coach() {
           </div>
         )}
 
-        <div className="flex gap-2">
-          <input
+        <div className="flex items-end gap-2">
+          <textarea
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && send()}
-            placeholder="Pose ta question…"
-            className="flex-1 rounded-2xl bg-ink-700 px-4 py-3 text-sm outline-none ring-1 ring-white/[0.07] focus:ring-white/20"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send();
+              }
+            }}
+            rows={1}
+            placeholder="Pose ta question ou colle tes données (Basic-Fit, CSV, JSON)…"
+            className="max-h-40 min-h-[44px] flex-1 resize-none rounded-2xl bg-ink-700 px-4 py-3 text-sm outline-none ring-1 ring-white/[0.07] focus:ring-white/20"
           />
           <motion.button
             whileTap={{ scale: 0.92 }}
